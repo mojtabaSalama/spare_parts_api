@@ -1,0 +1,149 @@
+{
+  "info": {
+    "name": "Spare Parts API",
+    "description": "Local API tests for authentication, inventory, categories, suppliers, and stock movements.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "supplierId", "value": "1" },
+    { "key": "partId", "value": "1" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5000/health", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+            "const body = pm.response.json();",
+            "if (body.data?.token) pm.collectionVariables.set('accessToken', body.data.token);",
+            "if (body.data?.refreshToken) pm.collectionVariables.set('refreshToken', body.data.refreshToken);"
+          ] } }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@spareparts.com\",\n  \"password\": \"Admin@1234\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+            "const body = pm.response.json();",
+            "if (body.data?.token) pm.collectionVariables.set('accessToken', body.data.token);",
+            "if (body.data?.refreshToken) pm.collectionVariables.set('refreshToken', body.data.refreshToken);"
+          ] } }],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Current User",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] } }
+        },
+        {
+          "name": "Create Staff",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Inventory Staff\",\n  \"email\": \"staff@example.com\",\n  \"password\": \"Password123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/staff", "host": ["{{baseUrl}}"], "path": ["auth", "staff"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        { "name": "List Categories", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] } } },
+        {
+          "name": "Create Category",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "const body = pm.response.json();",
+            "if (body.data?.id) pm.collectionVariables.set('categoryId', body.data.id);"
+          ] } }],
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Engine Parts\",\n  \"description\": \"Engine components and consumables\"\n}" },
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+          }
+        },
+        { "name": "Update Category", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Engine Components\",\n  \"description\": \"Updated category\"\n}" }, "url": { "raw": "{{baseUrl}}/categories/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["categories", "{{categoryId}}"] } } },
+        { "name": "Delete Category", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/categories/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["categories", "{{categoryId}}"] } } }
+      ]
+    },
+    {
+      "name": "Suppliers",
+      "item": [
+        { "name": "List Suppliers", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/suppliers", "host": ["{{baseUrl}}"], "path": ["suppliers"] } } },
+        {
+          "name": "Create Supplier",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "const body = pm.response.json();",
+            "if (body.data?.id) pm.collectionVariables.set('supplierId', body.data.id);"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Motor Supply Co.\",\n  \"contactName\": \"Alex Smith\",\n  \"phone\": \"555-0100\",\n  \"email\": \"sales@example.com\",\n  \"address\": \"100 Industrial Road\"\n}" }, "url": { "raw": "{{baseUrl}}/suppliers", "host": ["{{baseUrl}}"], "path": ["suppliers"] } }
+        },
+        { "name": "Update Supplier", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"phone\": \"555-0199\"\n}" }, "url": { "raw": "{{baseUrl}}/suppliers/{{supplierId}}", "host": ["{{baseUrl}}"], "path": ["suppliers", "{{supplierId}}"] } } },
+        { "name": "Delete Supplier", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/suppliers/{{supplierId}}", "host": ["{{baseUrl}}"], "path": ["suppliers", "{{supplierId}}"] } } }
+      ]
+    },
+    {
+      "name": "Parts",
+      "item": [
+        { "name": "List Parts", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/parts", "host": ["{{baseUrl}}"], "path": ["parts"] } } },
+        { "name": "Search Parts", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/parts?search=filter&categoryId={{categoryId}}&lowStockOnly=true", "host": ["{{baseUrl}}"], "path": ["parts"], "query": [{ "key": "search", "value": "filter" }, { "key": "categoryId", "value": "{{categoryId}}" }, { "key": "lowStockOnly", "value": "true" }] } } },
+        { "name": "Low Stock Parts", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/parts/low-stock", "host": ["{{baseUrl}}"], "path": ["parts", "low-stock"] } } },
+        { "name": "Get Part", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/parts/{{partId}}", "host": ["{{baseUrl}}"], "path": ["parts", "{{partId}}"] } } },
+        {
+          "name": "Create Part",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "const body = pm.response.json();",
+            "if (body.data?.id) pm.collectionVariables.set('partId', body.data.id);"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"sku\": \"FLT-001\",\n  \"name\": \"Oil Filter\",\n  \"description\": \"Standard engine oil filter\",\n  \"quantity\": 10,\n  \"minStockLevel\": 5,\n  \"price\": 12.50,\n  \"categoryId\": {{categoryId}},\n  \"supplierId\": {{supplierId}}\n}" }, "url": { "raw": "{{baseUrl}}/parts", "host": ["{{baseUrl}}"], "path": ["parts"] } }
+        },
+        { "name": "Update Part", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Premium Oil Filter\",\n  \"price\": 15.75\n}" }, "url": { "raw": "{{baseUrl}}/parts/{{partId}}", "host": ["{{baseUrl}}"], "path": ["parts", "{{partId}}"] } } },
+        { "name": "Delete Part", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/parts/{{partId}}", "host": ["{{baseUrl}}"], "path": ["parts", "{{partId}}"] } } }
+      ]
+    },
+    {
+      "name": "Stock",
+      "item": [
+        { "name": "Stock In", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"partId\": {{partId}},\n  \"quantity\": 5,\n  \"reason\": \"Supplier delivery\"\n}" }, "url": { "raw": "{{baseUrl}}/stock/in", "host": ["{{baseUrl}}"], "path": ["stock", "in"] } } },
+        { "name": "Stock Out", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"partId\": {{partId}},\n  \"quantity\": 2,\n  \"reason\": \"Customer sale\"\n}" }, "url": { "raw": "{{baseUrl}}/stock/out", "host": ["{{baseUrl}}"], "path": ["stock", "out"] } } },
+        { "name": "Adjust Stock", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"partId\": {{partId}},\n  \"newQuantity\": 8,\n  \"reason\": \"Physical inventory count\"\n}" }, "url": { "raw": "{{baseUrl}}/stock/adjust", "host": ["{{baseUrl}}"], "path": ["stock", "adjust"] } } },
+        { "name": "Part Movement History", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/stock/movements/{{partId}}", "host": ["{{baseUrl}}"], "path": ["stock", "movements", "{{partId}}"] } } }
+      ]
+    }
+  ]
+}
